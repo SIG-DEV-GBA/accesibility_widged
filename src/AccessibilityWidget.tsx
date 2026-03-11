@@ -39,6 +39,7 @@ export function AccessibilityWidget({
   const hasFeature = (f: A11yFeature) => features.includes(f);
 
   const [open, setOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [state, setState] = useState<A11yState>(A11Y_DEFAULTS);
   const [mounted, setMounted] = useState(false);
   const [lang, setLang] = useState('es');
@@ -79,6 +80,15 @@ export function AccessibilityWidget({
     setMounted(true);
   }, [storageKey]);
 
+  /* ── Detect mobile ── */
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
   /* ── Persist + apply ── */
   useEffect(() => {
     if (!mounted) return;
@@ -90,6 +100,8 @@ export function AccessibilityWidget({
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
+      // On mobile, backdrop handles closing — skip outside-click on root
+      if (isMobile) return;
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
@@ -99,7 +111,7 @@ export function AccessibilityWidget({
       document.removeEventListener('mousedown', handler);
       document.removeEventListener('keydown', esc);
     };
-  }, [open]);
+  }, [open, isMobile]);
 
   /* ── TTS helpers ── */
   const clearReadingHighlight = useCallback(() => {
@@ -233,9 +245,25 @@ export function AccessibilityWidget({
 
   return (
     <div ref={ref} className={`fpvsi-a11y ${posClass}`} style={{ zIndex }}>
+      {/* Backdrop (mobile only) */}
+      {isMobile && (
+        <div
+          className={`fpvsi-a11y__backdrop ${open ? 'fpvsi-a11y__backdrop--visible' : ''}`}
+          onClick={() => setOpen(false)}
+          style={{ zIndex }}
+        />
+      )}
+
       {/* Panel */}
-      <div className={`fpvsi-a11y__panel-wrap ${open ? 'fpvsi-a11y__panel-wrap--open' : 'fpvsi-a11y__panel-wrap--closed'}`}>
+      <div className={`fpvsi-a11y__panel-wrap ${open ? 'fpvsi-a11y__panel-wrap--open' : 'fpvsi-a11y__panel-wrap--closed'}`} style={isMobile ? { zIndex: zIndex + 1 } : undefined}>
         <div className="fpvsi-a11y__panel">
+          {/* Handle (mobile only) */}
+          {isMobile && (
+            <div className="fpvsi-a11y__handle">
+              <div className="fpvsi-a11y__handle-bar" />
+            </div>
+          )}
+
           {/* Header */}
           <div className="fpvsi-a11y__header">
             <div className="fpvsi-a11y__header-glow" />
@@ -415,29 +443,43 @@ export function AccessibilityWidget({
         </div>
       </div>
 
-      {/* FAB trigger */}
-      <button
-        onClick={() => setOpen(o => !o)}
-        className={`fpvsi-a11y__trigger ${
-          open
-            ? 'fpvsi-a11y__trigger--open'
-            : dirty
-              ? 'fpvsi-a11y__trigger--dirty'
-              : 'fpvsi-a11y__trigger--default'
-        }`}
-        aria-label={labels.trigger}
-        aria-expanded={open}
-      >
-        <Accessibility />
-        {dirty && !open && (
-          <span className="fpvsi-a11y__badge">
-            <span className="fpvsi-a11y__badge-text">{activeCount}</span>
-          </span>
-        )}
-        {dirty && !open && (
-          <span className="fpvsi-a11y__pulse" />
-        )}
-      </button>
+      {/* Mobile: tab lateral */}
+      {isMobile && (
+        <button
+          onClick={() => setOpen(o => !o)}
+          className={`fpvsi-a11y__tab ${dirty ? 'fpvsi-a11y__tab--dirty' : ''}`}
+          aria-label={labels.trigger}
+          aria-expanded={open}
+        >
+          <Accessibility />
+        </button>
+      )}
+
+      {/* Desktop: FAB trigger */}
+      {!isMobile && (
+        <button
+          onClick={() => setOpen(o => !o)}
+          className={`fpvsi-a11y__trigger ${
+            open
+              ? 'fpvsi-a11y__trigger--open'
+              : dirty
+                ? 'fpvsi-a11y__trigger--dirty'
+                : 'fpvsi-a11y__trigger--default'
+          }`}
+          aria-label={labels.trigger}
+          aria-expanded={open}
+        >
+          <Accessibility />
+          {dirty && !open && (
+            <span className="fpvsi-a11y__badge">
+              <span className="fpvsi-a11y__badge-text">{activeCount}</span>
+            </span>
+          )}
+          {dirty && !open && (
+            <span className="fpvsi-a11y__pulse" />
+          )}
+        </button>
+      )}
     </div>
   );
 }

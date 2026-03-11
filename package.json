@@ -1,6 +1,6 @@
 {
   "name": "fpvsi-a11y-widget",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Accessible widget with TTS reader, visual settings and language switcher",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

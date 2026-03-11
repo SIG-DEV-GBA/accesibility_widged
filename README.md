@@ -18,6 +18,20 @@ Widget de accesibilidad para aplicaciones React. Incluye ajuste de tamaño de fu
 - **Lector de voz (TTS)** — Modo interactivo: hover resalta bloques, click lee en voz alta
 - **Selector de idiomas** — Integración con GTranslate para traducción automática
 
+### Mobile UX
+
+En pantallas moviles (<768px) el widget cambia automaticamente a un patron nativo:
+
+- **Trigger**: mini-tab lateral (36x36px) pegada al borde de la pantalla, centrada verticalmente
+- **Panel**: bottom sheet full-width que sube desde abajo con animacion slide-up
+- **Backdrop**: fondo oscuro semitransparente con cierre al tap
+- **Handle**: barra indicadora gris en la parte superior del sheet
+- **Tab dirty**: cuando hay opciones activas, la tab se pone en color primario
+
+En desktop (>=768px) se mantiene el FAB circular + panel flotante habitual.
+
+La deteccion es automatica via `matchMedia` + CSS media queries, incluyendo rotacion de pantalla.
+
 Todas las preferencias se guardan automáticamente en `localStorage`.
 
 ## Instalacion
@@ -116,7 +130,7 @@ function App() {
 | Prop | Tipo | Default | Descripcion |
 |------|------|---------|-------------|
 | `colors` | `{ primary?: string; accent?: string }` | `{ primary: '#A10D5E', accent: '#F29429' }` | Colores de marca. Se derivan 7 CSS vars automaticamente. |
-| `position` | `'bottom-left' \| 'bottom-right'` | `'bottom-left'` | Posicion del boton flotante |
+| `position` | `'bottom-left' \| 'bottom-right'` | `'bottom-left'` | Posicion del boton flotante. En mobile, determina el lado de la tab lateral (izquierda o derecha). |
 | `features` | `A11yFeature[]` | Todas | Funcionalidades a mostrar |
 | `languages` | `A11yLanguage[]` | ES, EN, GL, CA, EU | Opciones de idioma (GTranslate) |
 | `ttsLang` | `string` | `'es-ES'` | Idioma del lector de voz |

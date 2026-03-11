@@ -450,6 +450,7 @@ export function AccessibilityWidget({
           className={`fpvsi-a11y__tab ${dirty ? 'fpvsi-a11y__tab--dirty' : ''}`}
           aria-label={labels.trigger}
           aria-expanded={open}
+          style={{ zIndex }}
         >
           <Accessibility />
         </button>

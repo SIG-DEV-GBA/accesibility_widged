@@ -744,12 +744,17 @@
   /* Ocultar FAB en mobile */
   .fpvsi-a11y__trigger { display: none; }
 
-  /* Reset root positioning for mobile */
+  /* Reset root: static so children's position:fixed works relative to viewport */
   .fpvsi-a11y {
+    position: static;
     bottom: auto;
     left: auto;
     right: auto;
-    position: fixed;
+  }
+  .fpvsi-a11y--bottom-left,
+  .fpvsi-a11y--bottom-right {
+    left: auto;
+    right: auto;
   }
 
   /* Tab lateral */
